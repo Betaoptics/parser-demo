@@ -1,0 +1,24 @@
+{
+  "name": "parser-demo",
+  "version": "1.0.0",
+  "description": "Simple parser demo for an API request",
+  "keywords": [
+    "Parser",
+    "Demo"
+  ],
+  "homepage": "https://github.com/Betaoptics/parser-demo#readme",
+  "bugs": {
+    "url": "https://github.com/Betaoptics/parser-demo/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Betaoptics/parser-demo.git"
+  },
+  "license": "UNLICENSED",
+  "author": "Joonas Niinimäki",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
