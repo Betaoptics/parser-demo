@@ -1,41 +1,65 @@
 const fs = require('fs');
 const path = require('path');
 const XLSX = require('xlsx');
-require('dotenv').config();
 
-// Example data (replace with your actual dataset or source)
-const data = [
-    {
-        id: 1,
-        name: "Leanne Graham",
-        username: "Bret",
-        email: "Sincere@april.biz",
-        address: {
-            street: "Kulas Light",
-            suite: "Apt. 556",
-            city: "Gwenborough",
-            zipcode: "92998-3874",
-            geo: {
-                lat: "-37.3159",
-                lng: "81.1496",
-            },
-        },
-        phone: "1-770-736-8031 x56442",
-        website: "hildegard.org",
-        company: {
-            name: "Romaguera-Crona",
-            catchPhrase: "Multi-layered client-server neural-net",
-            bs: "harness real-time e-markets",
-        },
-    },
-    // Add the remaining objects from your dataset here
-];
+// Load environment variables from .env at the project root
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
+// Fetch the API URL from .env
+const API_URL = process.env.API_URL;
 
-let firstname = data[0].name.split(' ')[0];
-console.log(firstname, "\n");
-let lastname = data[0].name.split(' ')[1];
-console.log(lastname, "\n");
+if (!API_URL) {
+    console.error('Error: API_URL is not defined in the .env file.');
+    process.exit(1);
+}
+
+// Function to sanitize and validate input data
+function sanitizeData(data) {
+    if (!Array.isArray(data)) {
+        throw new Error('Data is not an array.');
+    }
+
+    return data.map((item) => {
+        // Validate and sanitize each item
+        if (typeof item !== 'object' || !item.name || typeof item.name !== 'string') {
+            throw new Error('Invalid data format.');
+        }
+
+        const sanitized = {
+            firstname: '',
+            lastname: '',
+            email: typeof item.email === 'string' ? item.email : '',
+            street: typeof item.address?.street === 'string' ? item.address.street : '',
+            city: typeof item.address?.city === 'string' ? item.address.city : '',
+            zipcode: typeof item.address?.zipcode === 'string' ? item.address.zipcode : '',
+            phone: typeof item.phone === 'string' ? item.phone : '',
+            website: typeof item.website === 'string' ? item.website : '',
+        };
+
+        // Split name into firstname and lastname
+        const [firstname, lastname] = item.name.split(' ');
+        sanitized.firstname = firstname || '';
+        sanitized.lastname = lastname || '';
+
+        return sanitized;
+    });
+}
+
+// Function to fetch data from the API using the Fetch API
+async function fetchData() {
+    try {
+        const response = await fetch(API_URL); // Use the API_URL from the environment variable
+        if (!response.ok) {
+            throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return sanitizeData(data); // Sanitize data before returning
+    } catch (error) {
+        console.error('Error fetching data from API:', error);
+        throw error;
+    }
+}
 
 // Function to get the current timestamp in the format yyyymmddhhMMss
 function getCurrentTimestamp() {
@@ -49,34 +73,34 @@ function getCurrentTimestamp() {
     return `${year}${month}${day}${hours}${minutes}${seconds}`;
 }
 
-// Get the file path from command-line arguments or default to the current directory
-const outputPath = process.argv[2] || __dirname; // Default to current directory if no argument is passed
-const timestamp = getCurrentTimestamp();
-const EXCEL_FILE_PATH = path.join(outputPath, `employees_${timestamp}.xlsx`);
+// Ensure 'data' folder exists at the root of the project
+function ensureDataFolderExists() {
+    const rootPath = path.resolve(__dirname, '..'); // Navigate to the project root
+    const dataFolderPath = path.join(rootPath, 'data');
+    if (!fs.existsSync(dataFolderPath)) {
+        fs.mkdirSync(dataFolderPath);
+        console.log(`Created 'data' folder at: ${dataFolderPath}`);
+    }
+    return dataFolderPath;
+}
 
-// Function to parse the required fields and split names
-function parseData(data) {
-    return data
-        .map((item) => {
-            const [firstname, lastname] = item.name.split(' '); // Split the name into firstname and lastname
-            return {
-                firstname,
-                lastname,
-                email: item.email,
-                street: item.address.street,
-                city: item.address.city,
-                zipcode: item.address.zipcode,
-                phone: item.phone,
-                website: item.website,
-            };
-        })
-        .sort((a, b) => a.firstname.localeCompare(b.firstname)); // Sort by firstname
+// Determine the output file path
+function determineOutputFilePath(dataFolderPath) {
+    // Check for existing files starting with 'employees_'
+    const existingFile = fs.readdirSync(dataFolderPath).find((file) => file.startsWith('employees_') && file.endsWith('.xlsx'));
+
+    // If an existing file is found, overwrite it; otherwise, create a new file
+    if (existingFile) {
+        return path.join(dataFolderPath, existingFile);
+    } else {
+        const timestamp = getCurrentTimestamp();
+        return path.join(dataFolderPath, `employees_${timestamp}.xlsx`);
+    }
 }
 
 // Function to write parsed data to an Excel file
 function writeDataToExcel(filePath, data) {
     try {
-        console.log("data before being written into .csv: ", data);
         // Create a new workbook and worksheet
         const workbook = XLSX.utils.book_new();
         const worksheet = XLSX.utils.json_to_sheet(data);
@@ -96,8 +120,15 @@ function writeDataToExcel(filePath, data) {
 // Main function
 async function main() {
     try {
-        const parsedData = parseData(data);
-        writeDataToExcel(EXCEL_FILE_PATH, parsedData);
+        console.log('Fetching data from API...');
+        const data = await fetchData(); // Fetch and sanitize data
+
+        // Ensure 'data' folder exists at the project root
+        const dataFolderPath = ensureDataFolderExists();
+
+        // Determine the file path and write the Excel file
+        const EXCEL_FILE_PATH = determineOutputFilePath(dataFolderPath);
+        writeDataToExcel(EXCEL_FILE_PATH, data);
     } catch (error) {
         console.error('Error:', error);
     }
