@@ -76,7 +76,7 @@ function getCurrentTimestamp() {
 // Ensure 'data' folder exists at the root of the project
 function ensureDataFolderExists() {
     const rootPath = path.resolve(__dirname, '..'); // Navigate to the project root
-    const dataFolderPath = path.join(rootPath, 'data');
+    const dataFolderPath = path.join(rootPath, 'data'); // By default the data is saved into 'data' folder that is created dynamically. You can manipulate these params to change the save location for the data.
     if (!fs.existsSync(dataFolderPath)) {
         fs.mkdirSync(dataFolderPath);
         console.log(`Created 'data' folder at: ${dataFolderPath}`);
