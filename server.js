@@ -31,7 +31,7 @@ app.get('/', (req, res) => {
 });
 
 // Serve static files
-app.use('/public', express.static(path.join(__dirname, 'public')));
+//app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Serve book catalog files
 app.use('/', require('./routes/root'));
