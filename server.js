@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3500;
 
 console.log(process.env.NODE_ENV);
 
-connectDB();
+//connectDB();
 
 app.use(logger);
 
@@ -28,12 +28,13 @@ app.use(express.json());
 // Define a simple route
 app.get('/', (req, res) => {
     res.send('Welcome to the Node.js server using dotenv, express, and express-async-errors!');
+    //res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
 // Serve static files
 //app.use('/public', express.static(path.join(__dirname, 'public')));
 
-// Serve book catalog files
+// Serve root and dataController files
 app.use('/', require('./routes/root'));
 app.use('/data', require('./routes/dataController'));
 
