@@ -2,6 +2,10 @@
 
 ### Welcome to the parser-demo
 
+Pre-requisets:
+Node: v22.9.0.
+npm: 11.0.0, or other package manager.
+
 The concept of the project was to create a code sample project for a company for the following challenges.
 
 - Fetch a list of users from API and save the data to a file.
