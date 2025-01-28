@@ -16,12 +16,12 @@ if (!API_URL) {
 // Function to sanitize and validate input data
 // This is to tackle a high security vulnerability risk of xlsx library, that has not been updated or maintained in few years
 // For more information see documentations: https://nvd.nist.gov/vuln/detail/CVE-2023-30533 & https://nvd.nist.gov/vuln/detail/CVE-2024-22363
-function sanitizeData(data) {
-    if (!Array.isArray(data)) {
+function sanitizeData(user) {
+    if (!Array.isArray(user)) {
         throw new Error('Data is not an array.');
     }
 
-    return data.map((item) => {
+    return user.map((item) => {
         if (typeof item !== 'object' || !item.name || typeof item.name !== 'string') {
             throw new Error('Invalid data format.');
         }
@@ -64,11 +64,11 @@ async function fetchData() {
             throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
         }
 
-        const data = await response.json();
-        const sanitizedData = sanitizeData(data);
+        const user = await response.json();
+        const sanitizedData = sanitizeData(user);
 
         // Write fetched data to 'users.json'
-        fs.writeFileSync(usersFilePath, JSON.stringify(data, null, 2));
+        fs.writeFileSync(usersFilePath, JSON.stringify(user, null, 2));
         console.log(`Fetched data written to: ${usersFilePath}`);
 
         return sanitizedData;
@@ -113,8 +113,8 @@ function determineOutputFilePath(dataFolderPath) {
 }
 
 // Function to sort data by lastname and firstname in ascending order
-function sortData(data) {
-    return data.sort((a, b) => {
+function sortData(user) {
+    return user.sort((a, b) => {
         if (a.lastname.toLowerCase() === b.lastname.toLowerCase()) {
             return a.firstname.toLowerCase().localeCompare(b.firstname.toLowerCase());
         }
@@ -123,7 +123,7 @@ function sortData(data) {
 }
 
 // Function to write data to an Excel file
-function writeDataToExcel(filePath, data) {
+function writeDataToExcel(filePath, user) {
     const rootPath = path.resolve(__dirname, '..');
     const usersFilePath = path.join(rootPath, 'users.json');
 
@@ -149,7 +149,7 @@ function writeDataToExcel(filePath, data) {
 
         // Default behavior: write the provided data to Excel
         console.log('Writing provided data to Excel...');
-        const sortedData = sortData(data);
+        const sortedData = sortData(user);
         const workbook = XLSX.utils.book_new();
         const worksheet = XLSX.utils.json_to_sheet(sortedData);
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Parsed Data');
@@ -164,14 +164,14 @@ function writeDataToExcel(filePath, data) {
 // Main function
 async function main() {
     try {
-        const data = await fetchData();
+        const user = await fetchData();
 
         // Ensure 'data' folder exists at the project root
         const dataFolderPath = ensureDataFolderExists();
 
         // Determine the file path and write the Excel file
         const EXCEL_FILE_PATH = determineOutputFilePath(dataFolderPath);
-        writeDataToExcel(EXCEL_FILE_PATH, data);
+        writeDataToExcel(EXCEL_FILE_PATH, user);
     } catch (error) {
         console.error('Error:', error);
     }

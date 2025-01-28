@@ -17,25 +17,20 @@
   "license": "UNLICENSED",
   "author": "Joonas Niinimäki",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "employees.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start:backend": "nodemon server.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "cjs-loader": "^0.1.0",
-    "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "express-async-errors": "^3.1.1",
     "parser-demo": "file:",
     "uuid": "^11.0.5",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "eslint": "^9.19.0",
-    "globals": "^15.14.0",
-    "nodemon": "^3.1.9"
+    "globals": "^15.14.0"
   }
 }
