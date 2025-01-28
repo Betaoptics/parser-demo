@@ -25,9 +25,12 @@ function sanitizeData(data) {
             throw new Error('Invalid data format.');
         }
 
+        // Split name into firstname and lastname
+        const [firstname, lastname] = item.name.split(' ');
+
         const sanitized = {
-            firstname: '',
-            lastname: '',
+            firstname: firstname || '',
+            lastname: lastname || '',
             email: typeof item.email === 'string' ? item.email : '',
             street: typeof item.address?.street === 'string' ? item.address.street : '',
             city: typeof item.address?.city === 'string' ? item.address.city : '',
@@ -35,11 +38,6 @@ function sanitizeData(data) {
             phone: typeof item.phone === 'string' ? item.phone : '',
             website: typeof item.website === 'string' ? item.website : '',
         };
-
-        // Split name into firstname and lastname
-        const [firstname, lastname] = item.name.split(' ');
-        sanitized.firstname = firstname || '';
-        sanitized.lastname = lastname || '';
 
         return sanitized;
     });
@@ -117,21 +115,23 @@ function writeDataToExcel(filePath, data) {
     }
 }
 
+function sortUsersByNameParams(data) {
+    const sortedusers = data.sort((a, b) => a.firstname.localeCompare(b.firstname)); // Sort by firstname
+    return sortedusers;
+}
+
 // Main function
 async function main() {
-    try {
-        console.log('Fetching data from API...');
-        const data = await fetchData(); // Fetch and sanitize data
+    console.log('Fetching data from API...');
+    const data = await fetchData(); // Fetch and sanitize data
+    const sortUsersByName = sortUsersByNameParams(data);
 
-        // Ensure 'data' folder exists at the project root
-        const dataFolderPath = ensureDataFolderExists();
+    // Ensure 'data' folder exists at the project root
+    const dataFolderPath = ensureDataFolderExists();
 
-        // Determine the file path and write the Excel file
-        const EXCEL_FILE_PATH = determineOutputFilePath(dataFolderPath);
-        writeDataToExcel(EXCEL_FILE_PATH, data);
-    } catch (error) {
-        console.error('Error:', error);
-    }
+    // Determine the file path and write the Excel file
+    const EXCEL_FILE_PATH = determineOutputFilePath(dataFolderPath);
+    writeDataToExcel(EXCEL_FILE_PATH, sortUsersByName);
 }
 
 main();
