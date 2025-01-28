@@ -5,11 +5,23 @@ const XLSX = require('xlsx');
 // Load environment variables from .env at the project root
 require('dotenv').config();
 
-// Fetch the API URL from environment variables
+// Fetch the configuration data from environment variables
+const ENV = process.env.NODE_ENV;
+const PORT = process.env.PORT;
 const API_URL = process.env.API_URL;
 
 if (!API_URL) {
     console.error('Error: API_URL is not defined in the .env file.');
+    process.exit(1);
+}
+
+if (!ENV) {
+    console.error('Error: ENV is not defined in the .env file.');
+    process.exit(1);
+}
+
+if (!PORT) {
+    console.error('Error: PORT is not defined in the .env file.');
     process.exit(1);
 }
 
@@ -102,14 +114,23 @@ function ensureDataFolderExists() {
 }
 
 // Determine the output file path
+// If it finds an excel file that starts with 'employees_', overwrite it
+// Uncomment below if you want to optimize space. But in this assignment the request was to always create a new excel file when ran
+// function determineOutputFilePath(dataFolderPath) {
+//     const existingFile = fs.readdirSync(dataFolderPath).find((file) => file.startsWith('employees_') && file.endsWith('.xlsx'));
+//     if (existingFile) {
+//         return path.join(dataFolderPath, existingFile);
+//     } else {
+//         const timestamp = getCurrentTimestamp();
+//         return path.join(dataFolderPath, `employees_${timestamp}.xlsx`);
+//     }
+// }
+
+// Determine the output file path
+// If you uncomment the above function, you need to comment this one out
 function determineOutputFilePath(dataFolderPath) {
-    const existingFile = fs.readdirSync(dataFolderPath).find((file) => file.startsWith('employees_') && file.endsWith('.xlsx'));
-    if (existingFile) {
-        return path.join(dataFolderPath, existingFile);
-    } else {
-        const timestamp = getCurrentTimestamp();
-        return path.join(dataFolderPath, `employees_${timestamp}.xlsx`);
-    }
+    const timestamp = getCurrentTimestamp();
+    return path.join(dataFolderPath, `employees_${timestamp}.xlsx`);
 }
 
 // Function to sort data by lastname and firstname in ascending order
