@@ -4,18 +4,6 @@
 
 The concept of the project was to create a code sample project for a company for the following challenges.
 
-- Hae lista käyttäjistä rajapinnasta: https://jsonplaceholder.typicode.com/users ja tallenna tiedostoon.
-- Mikäli tiedosto löytyy projektista, niin uutta rajapintakutsua ei tehdä. (Pyritään välttämään tässä yhteydessä rajapintakutsuja)
-- Poimitaan käyttäjien tiedoista:
-      name, email, street, city, zipcode, phone, website
-      
-- Tallennetaan tiedot exceliin seuraaviin sarakkeisiin. Yksi rivi on yksi henkilö.
-      - sukunimi, etunimi, email, katuosoite, postitoimipaikka, postinumero, puhelin, nettisivut
-      - voidaan olettaa, että name kentän ensimmäinen on etunimi ja toinen on sukunimi
-      - Järjestetään henkilöt (rivit) sukunimen ja etunimen mukaisesti aakkosjärjestykseen
-      - Excelin tallennuksen sijaintia voidaan muuttaa parametrin avulla
-      - Ajo muodostaa aina uuden excelin employees_vvvvkkpphhMMss.xlsx, jossa aikaleima on ajoaika
-
 - Fetch a list of users from API and save the data to a file.
 - If the file is already found within the project, then new request to the API is not performed. Goal is to limit unnecessary API requests.
 - From the data, pick following fields:
