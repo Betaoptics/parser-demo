@@ -33,6 +33,8 @@ After that you can run the code from console by running:
 
 ```
 node employees.js
+or simply:
+node .
 ```
 
 This will automatically create a ```users.json``` to the root of the project and dynamically create a data folder with the excel contents going within the folder.
