@@ -2,11 +2,12 @@
 
 ### Welcome to the parser-demo
 
-Pre-requisets:
-Node: v22.9.0.
-npm: 11.0.0, or other package manager.
+Pre-requisets: <br>
+Node: ```v22.9.0```.<br>
+npm: ```11.0.0```, or other package manager.
 
-The concept of the project was to create a code sample project for a company for the following challenges.
+
+The concept of the project was to create a code sample project for a company for the following challenges:
 
 - Fetch a list of users from API and save the data to a file.
 - If the file is already found within the project, then new request to the API is not performed. Goal is to limit unnecessary API requests.
