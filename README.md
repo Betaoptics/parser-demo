@@ -38,4 +38,4 @@ node .
 ```
 
 This will automatically create a ```users.json``` to the root of the project and dynamically create a data folder with the excel contents going within the folder.
-If you want to change the location of the folders: navigate to lines ```59-60 to``` in ```employees.js``` change the location of the ```users.json``` file save location, and if you want to change the ```employees_yyyymmddhhMMss.xlsx``` excel file save location, you can navigate to lines ```107-108```. To change the saving locations parameters, please add new parameters after ```__dirname``` (current diretory), by adding ```', <nexpath>'``` after it.
+If you want to change the location of the folders: navigate to lines ```65-66 to``` in ```employees.js``` change the location of the ```users.json``` file save location, and if you want to change the ```employees_yyyymmddhhMMss.xlsx``` excel file save location, you can navigate to line ```113```. To change the saving locations parameters, please add new parameters after ```__dirname``` (current diretory), by adding ```', <nexpath>'``` after it.
