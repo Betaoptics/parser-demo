@@ -5,10 +5,10 @@ const XLSX = require('xlsx');
 // Load environment variables from .env at the project root
 require('dotenv').config();
 
-// Fetch the configuration data from environment variables
 const ENV = process.env.NODE_ENV;
 const PORT = process.env.PORT;
 const API_URL = process.env.API_URL;
+
 
 if (!API_URL) {
     console.error('Error: API_URL is not defined in the .env file.');
@@ -25,9 +25,17 @@ if (!PORT) {
     process.exit(1);
 }
 
+// Uncomment lines 30, 33-36 and 79 if you want to test fetch is only called once based on params.
+// Initialize an in-memory counter                                                              
+// let counter = 0;
+
+// Function to update and log the fetch counter
+// function updateFetchCount() {
+//     counter += 1;
+//     console.log(`Fetch count: ${counter}`);
+// }
+
 // Function to sanitize and validate input data
-// This is to tackle a high security vulnerability risk of xlsx library, that has not been updated or maintained in few years
-// For more information see documentations: https://nvd.nist.gov/vuln/detail/CVE-2023-30533 & https://nvd.nist.gov/vuln/detail/CVE-2024-22363
 function sanitizeData(user) {
     if (!Array.isArray(user)) {
         throw new Error('Data is not an array.');
@@ -39,7 +47,7 @@ function sanitizeData(user) {
         }
 
         const [firstname, lastname] = item.name.split(' ');
-        const sanitized = {
+        return {
             firstname: firstname || '',
             lastname: lastname || '',
             email: typeof item.email === 'string' ? item.email : '',
@@ -49,8 +57,6 @@ function sanitizeData(user) {
             phone: typeof item.phone === 'string' ? item.phone : '',
             website: typeof item.website === 'string' ? item.website : '',
         };
-
-        return sanitized;
     });
 }
 
@@ -59,18 +65,19 @@ async function fetchData() {
     const rootPath = path.resolve(__dirname);
     const usersFilePath = path.join(rootPath, 'users.json');
 
-    // Check if 'users.json' exists
     if (fs.existsSync(usersFilePath)) {
         console.log('Found existing users.json file. Reading data...');
         const fileData = fs.readFileSync(usersFilePath, 'utf-8');
         if (fileData) {
-            const parsedData = JSON.parse(fileData);
-            return sanitizeData(parsedData);
+            return sanitizeData(JSON.parse(fileData));
         }
     }
 
     try {
         console.log('Fetching data from API...');
+        // Uncomment below and lines 30 & 33-36 to test that fetch is only called once.
+        // updateFetchCount(); // Increment counter when fetch is made
+
         const response = await fetch(API_URL);
         if (!response.ok) {
             throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
@@ -79,7 +86,6 @@ async function fetchData() {
         const user = await response.json();
         const sanitizedData = sanitizeData(user);
 
-        // Write fetched data to 'users.json'
         fs.writeFileSync(usersFilePath, JSON.stringify(user, null, 2));
         console.log(`Fetched data written to: ${usersFilePath}`);
 
@@ -104,8 +110,7 @@ function getCurrentTimestamp() {
 
 // Ensure 'data' folder exists at the root of the project
 function ensureDataFolderExists() {
-    const rootPath = path.resolve(__dirname);
-    const dataFolderPath = path.join(rootPath, 'data');
+    const dataFolderPath = path.join(__dirname, 'data');
     if (!fs.existsSync(dataFolderPath)) {
         fs.mkdirSync(dataFolderPath);
         console.log(`Created 'data' folder at: ${dataFolderPath}`);
@@ -114,20 +119,6 @@ function ensureDataFolderExists() {
 }
 
 // Determine the output file path
-// If it finds an excel file that starts with 'employees_', overwrite it
-// Uncomment below if you want to optimize space. But in this assignment the request was to always create a new excel file when ran
-// function determineOutputFilePath(dataFolderPath) {
-//     const existingFile = fs.readdirSync(dataFolderPath).find((file) => file.startsWith('employees_') && file.endsWith('.xlsx'));
-//     if (existingFile) {
-//         return path.join(dataFolderPath, existingFile);
-//     } else {
-//         const timestamp = getCurrentTimestamp();
-//         return path.join(dataFolderPath, `employees_${timestamp}.xlsx`);
-//     }
-// }
-
-// Determine the output file path
-// If you uncomment the above function, you need to comment this one out
 function determineOutputFilePath(dataFolderPath) {
     const timestamp = getCurrentTimestamp();
     return path.join(dataFolderPath, `employees_${timestamp}.xlsx`);
@@ -145,37 +136,13 @@ function sortData(user) {
 
 // Function to write data to an Excel file
 function writeDataToExcel(filePath, user) {
-    const rootPath = path.resolve(__dirname, '..');
-    const usersFilePath = path.join(rootPath, 'users.json');
-
     try {
-        // Check if 'users.json' exists and is not empty
-        if (fs.existsSync(usersFilePath)) {
-            const fileData = fs.readFileSync(usersFilePath, 'utf-8');
-            if (fileData) {
-                console.log('Using data from users.json to write to Excel...');
-                const parsedData = sanitizeData(JSON.parse(fileData));
-                const sortedData = sortData(parsedData);
-
-                // Write sorted data from users.json to Excel
-                const workbook = XLSX.utils.book_new();
-                const worksheet = XLSX.utils.json_to_sheet(sortedData);
-                XLSX.utils.book_append_sheet(workbook, worksheet, 'Parsed Data');
-                XLSX.writeFile(workbook, filePath);
-
-                console.log(`Parsed and sorted data from users.json written to Excel file: ${filePath}`);
-                return;
-            }
-        }
-
-        // Default behavior: write the provided data to Excel
         console.log('Writing provided data to Excel...');
         const sortedData = sortData(user);
         const workbook = XLSX.utils.book_new();
         const worksheet = XLSX.utils.json_to_sheet(sortedData);
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Parsed Data');
         XLSX.writeFile(workbook, filePath);
-
         console.log(`Parsed and sorted data written to Excel file: ${filePath}`);
     } catch (error) {
         console.error('Error writing data to Excel file:', error);
